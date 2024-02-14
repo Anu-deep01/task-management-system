@@ -12,7 +12,7 @@ export const signUp = async (req: Request, res: Response) => {
         // Check if the user already exists
         let user = await User.findOne({ email });
         if (user) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ message: 'User already exists', status: 400 });
         }
 
         // Create a new user
@@ -32,13 +32,13 @@ export const signUp = async (req: Request, res: Response) => {
             }
         };
 
-        jwt.sign(payload, process.env.JWT_SECRET || 'anudeepPandit', { expiresIn: '1h' }, (err, token) => {
+        jwt.sign(payload, process.env.JWT_SECRET || "", { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
-            res.json({ token });
+            res.json({ token, status: 200 });
         });
     } catch (error: any) {
         console.error(error.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server Error', status: 500 });
     }
 };
 
@@ -49,13 +49,13 @@ export const signIn = async (req: Request, res: Response) => {
         // Check if the user exists
         let user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials', status: 400 });
         }
 
         // Check if the password is correct
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
+            return res.status(400).json({ message: 'Invalid credentials', status: 400 });
         }
 
         // Generate JWT token
@@ -65,12 +65,12 @@ export const signIn = async (req: Request, res: Response) => {
             }
         };
 
-        jwt.sign(payload, process.env.JWT_SECRET || 'anudeepPandit', { expiresIn: '1h' }, (err, token) => {
+        jwt.sign(payload, process.env.JWT_SECRET || "", { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
-            res.json({ token });
+            res.json({ token, status: 200 });
         });
     } catch (error: any) {
         console.error(error.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server Error', status: 500 });
     }
 };

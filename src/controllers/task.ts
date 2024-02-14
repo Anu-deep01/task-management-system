@@ -2,16 +2,20 @@
 
 import { Request, Response } from 'express';
 import Task from '../models/Task';
+import { notifyClients } from '../websocket/websocket';
 
-// Define a custom interface that extends the Request interface
 interface AuthenticatedRequest extends Request {
-    user: { id: string }; // Modify this according to your user object structure
+    user: { id: string };
 }
 
 export const createTask = async (req: any, res: any) => {
     try {
         const task = new Task({ ...req.body, user: req.user.id });
         await task.save();
+
+        // Notify clients about the new task
+        notifyClients('task_created', task);
+
         res.status(201).json(task);
     } catch (error: any) {
         console.error(error.message);
@@ -30,11 +34,14 @@ export const updateTask = async (req: any, res: any) => {
         const task = await Task.findById(taskId);
 
         if (!task) {
-            return res.status(404).json({ message: 'Task not found' });
+            return res.status(404).json({ message: 'Task not found', status: 404 });
         }
 
         // Update task status
         task.status = status;
+
+        // Notify clients about the updated task
+        notifyClients('task_updated', task);
 
         // Save the updated task
         const updatedTask = await task.save();
@@ -42,7 +49,7 @@ export const updateTask = async (req: any, res: any) => {
         res.json(updatedTask);
     } catch (error: any) {
         console.error(error.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server Error', status: 500 });
     }
 };
 
@@ -52,12 +59,19 @@ export const deleteTask = async (req: any, res: any) => {
         const taskId = req.params.id;
 
         // Find the task by id and delete it
-        await Task.findByIdAndDelete(taskId);
+        const task = await Task.findByIdAndDelete(taskId);
 
-        res.json({ message: 'Task deleted successfully' });
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found', status: 404 });
+        }
+
+        // Notify clients about the deleted task
+        notifyClients('task_deleted', task);
+
+        res.json({ message: 'Task deleted successfully', status: 200 });
     } catch (error: any) {
         console.error(error.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server Error', status: 500 });
     }
 };
 
@@ -70,6 +84,6 @@ export const getAllTasks = async (req: any, res: any) => {
         res.json(tasks);
     } catch (error: any) {
         console.error(error.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ message: 'Server Error', status: 500 });
     }
 };

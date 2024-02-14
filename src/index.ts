@@ -2,22 +2,24 @@
 
 import express from 'express';
 import http from 'http';
-import WebSocket from 'ws';
 import mongoose, { ConnectOptions } from 'mongoose';
 import bodyParser from 'body-parser';
-import jwt from 'jsonwebtoken';
 import { authMiddleware } from './middleware/auth';
 import taskRoutes from './routes/task';
 import authRoutes from './routes/auth';
-import { handleWebSocket } from './websocket/websocket';
 import { RequestHandlerParams } from 'express-serve-static-core';
+import { Server as SocketIOServer } from 'socket.io';
+import { initializeWebSocket } from './websocket/websocket';
+import { rateLimitMiddleware } from "./middleware/rateLimitMiddleware";
+import dotenv from 'dotenv';
 
+dotenv.config();
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const io = new SocketIOServer(server);
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/task_manager',
+mongoose.connect(process.env.MONGODB_URI || "",
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,
@@ -28,13 +30,30 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/task_mana
 
 // Body parser middleware
 app.use(bodyParser.json());
+app.use(rateLimitMiddleware);
+
+initializeWebSocket(server);
 
 // Routes
 app.use('/api/task', authMiddleware as RequestHandlerParams, taskRoutes);
 app.use('/api/auth', authRoutes);
 
-// WebSocket
-wss.on('connection', handleWebSocket);
+// Socket.io event handling
+io.on('connection', (socket: any) => {
+    console.log('A user connected');
 
-const PORT = process.env.PORT || 3000;
+    // Handle when a client sends a message
+    socket.on('message', (message: any) => {
+        console.log('Message received:', message);
+        // Broadcast the message to all connected clients
+        io.emit('message', message);
+    });
+
+    // Handle when a user disconnects
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
+
+const PORT = process.env.PORT;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,23 +1,27 @@
-// src/websockets/websocket.ts
+import { Server, Socket } from 'socket.io';
 
-import WebSocket from 'ws';
+let io: Server;
 
-let clients: WebSocket[] = [];
 
-export const handleWebSocket = (ws: WebSocket) => {
-    clients.push(ws);
+export const initializeWebSocket = (server: any) => {
+    try {
+        io = require('socket.io')(server);
 
-    ws.on('message', (message: string) => {
-        console.log(`Received message: ${message}`);
-    });
+        io.on('connection', (socket: Socket) => {
+            console.log('New client connected');
 
-    ws.on('close', () => {
-        clients = clients.filter(client => client !== ws);
-    });
+            socket.on('disconnect', () => {
+                console.log('Client disconnected');
+            });
+        });
+    } catch (error) {
+        console.error('Error initializing WebSocket:', error);
+    }
 };
 
 export const notifyClients = (event: string, data: any) => {
-    clients.forEach(client => {
-        client.send(JSON.stringify({ event, data }));
-    });
+    if (io) {
+        io.emit(event, data);
+        console.log(`Notification sent to all clients: ${event} -- ${JSON.stringify(data)}`);
+    }
 };

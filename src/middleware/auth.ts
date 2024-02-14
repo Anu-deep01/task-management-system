@@ -19,7 +19,7 @@ export const authMiddleware: MiddlewareFunction = (req, res, next) => {
     }
 
     try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'anudeepPandit');
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "");
         req.user = decoded.user;
         next();
     } catch (error) {
