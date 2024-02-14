@@ -32,7 +32,7 @@ export const signUp = async (req: Request, res: Response) => {
             }
         };
 
-        jwt.sign(payload, process.env.JWT_SECRET || 'your_jwt_secret_key', { expiresIn: '1h' }, (err, token) => {
+        jwt.sign(payload, process.env.JWT_SECRET || 'anudeepPandit', { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
             res.json({ token });
         });
@@ -65,7 +65,7 @@ export const signIn = async (req: Request, res: Response) => {
             }
         };
 
-        jwt.sign(payload, process.env.JWT_SECRET || 'your_jwt_secret_key', { expiresIn: '1h' }, (err, token) => {
+        jwt.sign(payload, process.env.JWT_SECRET || 'anudeepPandit', { expiresIn: '1h' }, (err, token) => {
             if (err) throw err;
             res.json({ token });
         });
