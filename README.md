@@ -64,14 +64,17 @@ Create a new task.
     "description": "Task Description",
     "status": "active"
 }
+```
 PUT /api/task/:id
 Update a task's status.
 
 Request Parameters: id (Task ID)
 Request Body:
+```json
 {
     "status": "completed"
 }
+```
 DELETE /api/task/:id
 Delete a task.
 
@@ -81,19 +84,23 @@ POST /api/auth/signup
 Create a new user account.
 
 Request Body:
+```json
 {
     "username": "Your Username",
     "email": "user@example.com",
     "password": "your_password"
 }
+```
 POST /api/auth/signin
 Sign in with an existing user account.
 
 Request Body:
+```json
 {
     "email": "user@example.com",
     "password": "your_password"
 }
+```
 Real-time Update Mechanism
 The server utilizes WebSocket for real-time updates. Clients are notified in real-time when a task is added, updated, or deleted. WebSocket events are triggered when changes occur, and connected clients receive these updates instantly.
 
