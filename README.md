@@ -58,7 +58,7 @@ Create a new task.
 
 - Request Body:
 
-```json
+```
 {
     "title": "Task Title",
     "description": "Task Description",
@@ -70,7 +70,7 @@ Update a task's status.
 
 Request Parameters: id (Task ID)
 Request Body:
-```json
+```
 {
     "status": "completed"
 }
@@ -84,7 +84,7 @@ POST /api/auth/signup
 Create a new user account.
 
 Request Body:
-```json
+```
 {
     "username": "Your Username",
     "email": "user@example.com",
@@ -95,7 +95,7 @@ POST /api/auth/signin
 Sign in with an existing user account.
 
 Request Body:
-```json
+```
 {
     "email": "user@example.com",
     "password": "your_password"
